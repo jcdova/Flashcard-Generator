@@ -8,19 +8,18 @@ inquirer.prompt([
 		type: 'list',
 		name: 'command',
 		message: 'Please select an option below:',
-		// choices: ['Add-Flashcard', 'Show-Flashcard']
 		choices: [{
         name: 'Add Flashcard'
     }, {
-        name: 'Show Flashcards'
+        name: 'See text file'
     }]
 
 	}
 ]).then(function(answer) {
 	if (answer.command === 'Add Flashcard') {
 		addCard();
-	} else if (answer.command === 'Show Flashcards') {
-		showCards();
+	} else if (answer.command === 'See text file') {
+		console.log ("Please reference log.txt file");
 	}
 });
 
@@ -59,11 +58,12 @@ inquirer.prompt([
 			var newBasic = new BasicCard(answer.front, answer.back);
 			newBasic.createCard();
 				
-			if (answer.continue = true) 
+			if (answer.continue === true) {
 				addCard();
-			else 
-				return;
-				showCards();
+			}
+			else if (answer.continue === false) {
+				console.log("Please reference the log.txt file");
+			}
 		});
 	} else if (answer.cardType === 'Cloze Flashcard') {
 		inquirer.prompt([
@@ -85,79 +85,19 @@ inquirer.prompt([
 			if (fullText.includes(cloze)) {
 				var newCloze = new ClozeCard(fullText, cloze);
 				newCloze.createCard();
-				
-			} else {
-				console.log("Please Try Again");
+			} 
+			else {
+				console.log("That cloze is not found in the full text. Please try again:");
 				addCard();
 			}
-			if (answer.continue = true) 
-				addCard();
-			else 
-				return;
-				showCards();		
+			if (answer.continue === true) {
+				addCard();	
+			} 
+			else if (answer.continue === false) { 
+				console.log("Please reference the log.txt file");
+			}
 		});
 	}
-	});
+  });
 };
 
-var showCards = function() {
-    fs.readFile('./log.txt', 'utf8', function(error, data) {
-        if (error) {
-            console.log('Error occurred: ' + error);
-        }
-        var questions = data.split(';');
-        var notBlank = function(value) {
-            return value;
-        };
-        questions = questions.filter(notBlank);
-        var count = 0;
-        showQuestion(questions, count);
-    });
-};
-
-var showCards = function() {
-    // reads the log.txt file
-    fs.readFile('./log.txt', 'utf8', function(error, data) {
-        //if there is an error, log it
-        if (error) {
-            console.log('Error occurred: ' + error);
-        }
-        var questions = data.split(';');
-        var notBlank = function(value) {
-            return value;
-        };
-        questions = questions.filter(notBlank);
-        var count = 0;
-        showQuestion(questions, count);
-    });
-};
-
-var showQuestion = function(array, index) {
-    question = array[index];
-    var parsedQuestion = JSON.parse(question);
-    var questionText;
-    var correctReponse;
-    if (parsedQuestion.type === 'basic') {
-        questionText = parsedQuestion.front;
-        correctReponse = parsedQuestion.back;
-    } else if (parsedQuestion.type === 'cloze') {
-        questionText = parsedQuestion.partial;
-        correctReponse = parsedQuestion.cloze;
-    }
-    inquirer.prompt([{
-        name: 'response',
-        message: questionText
-    }]).then(function(answer) {
-        if (answer.response === correctReponse) {
-            console.log('Correct Answer!');
-            if (index < array.length - 1) {
-              showQuestion(array, index + 1);
-            }
-        } else {
-            console.log('Incorrect Answer!');
-            if (index < array.length - 1) {
-              showQuestion(array, index + 1);
-            }
-        }
-    });
-};
